@@ -64,7 +64,6 @@ public class ServerCommunication {
             conn.setRequestProperty(entry.getKey(), entry.getValue());
         }
     }
-
     private void SendMessage(){
         final Thread thread = new Thread(){
             @Override
