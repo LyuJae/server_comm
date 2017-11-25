@@ -1,6 +1,8 @@
 package com.example.ryu.myapplication;
 
+import android.content.SharedPreferences;
 import android.icu.text.SymbolTable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
@@ -53,8 +55,9 @@ public class ServerCommunication {
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST"); //요청 방식을 설정 (default : GET)
             conn.setDoInput(true); //input을 사용하도록 설정 (default : true)
-            conn.setDoOutput(false); //output을 사용하도록 설정 (default : false)
+            conn.setDoOutput(true); //output을 사용하도록 설정 (default : false)
             conn.setConnectTimeout(60); //타임아웃 시간 설정 (default : 무한대기)
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -80,27 +83,40 @@ public class ServerCommunication {
                         sb.append(line + "\n");
                     }
                     System.out.println("sb : " + sb);
+                    ReadMessage(sb);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                Message msg = Message.obtain();
-                switch (sb.toString()) {
-                    case "login_ok\n":
-                        msg.what = LOGIN_SUCCESS;
-                        break;
-                    case "login_fail\n":
-                        msg.what = LOGIN_FAIL;
-                        break;
-                    case "signup_ok\n":
-                        msg.what = SIGNUP_SUCCESS;
-                        break;
-                    default:
-                        msg.what = SERVER_CONNECT_FAIL;
-                        break;
-                }
-                mHandler.sendMessage(msg);
             }
         };
         thread.start();
+    }
+    private void ReadMessage(StringBuilder sb){
+        Message msg = Message.obtain();
+        Bundle bundle = new Bundle();
+        switch (sb.toString()) {
+            case "login_succ\n":
+                String cookie = conn.getHeaderFields().get("Set-Cookie").get(0);
+                System.out.println("conn.getHeaderFields().get(\"set-cookie\") : " +cookie);
+                String session_key = cookie.substring(cookie.indexOf("sk=") + 3, cookie.length());
+                System.out.println("Sessionkey : " + session_key);
+                bundle.putInt("result", LOGIN_SUCCESS);
+                bundle.putString("session_key", session_key);
+                msg.setData(bundle);
+                break;
+            case "login_fail\n":
+                bundle.putInt("result", LOGIN_FAIL);
+                msg.setData(bundle);
+                break;
+            case "signup_ok\n":
+                bundle.putInt("result", SIGNUP_SUCCESS);
+                msg.setData(bundle);
+                break;
+            default:
+                bundle.putInt("result", SERVER_CONNECT_FAIL);
+                msg.setData(bundle);
+                break;
+        }
+        mHandler.sendMessage(msg);
     }
 }

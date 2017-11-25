@@ -26,7 +26,7 @@ public class SignupActivity extends AppCompatActivity{
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            switch (msg.what){
+            switch (msg.getData().getInt("result")){
                 case ServerCommunication.SIGNUP_SUCCESS:
                     Toast.makeText(getApplicationContext(), "SIGN UP SUCCESS", Toast.LENGTH_SHORT).show();
                     break;

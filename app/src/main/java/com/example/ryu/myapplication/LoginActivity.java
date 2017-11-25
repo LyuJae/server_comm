@@ -1,6 +1,7 @@
 package com.example.ryu.myapplication;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 public class LoginActivity extends AppCompatActivity {
     Button loginBtn;
     Button signupBtn;
+    Button testBtn;
     EditText id_text;
     EditText pw_text;
 
@@ -26,12 +28,15 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            switch (msg.what){
+            switch (msg.getData().getInt("result")){
                 case ServerCommunication.SERVER_CONNECT_OK:
-
                     break;
                 case ServerCommunication.LOGIN_SUCCESS:
                     Toast.makeText(getApplicationContext(), "Login Succ", Toast.LENGTH_SHORT).show();
+                    SharedPreferences pref = getSharedPreferences("pro_pref", 0);
+                    SharedPreferences.Editor edit = pref.edit();
+                    edit.putString("uuid", msg.getData().getString("session_key"));
+                    edit.commit();
                     break;
                 case ServerCommunication.LOGIN_FAIL:
                     Toast.makeText(getApplicationContext(), "Login Fail", Toast.LENGTH_SHORT).show();
@@ -59,6 +64,7 @@ public class LoginActivity extends AppCompatActivity {
         pw_text = (EditText)findViewById(R.id.edittext_pw);
         loginBtn = (Button)findViewById(R.id.loginbtn);
         signupBtn = (Button)findViewById(R.id.signup_btn);
+        testBtn = (Button)findViewById(R.id.test_btn);
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,17 +79,19 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        testBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
     public void LoginProcess(){
         mServer.SetProperty("id", id_text.getText().toString());
         mServer.SetProperty("pw", pw_text.getText().toString());
         mServer.SendMSG("login");
     }
-    private void SignupProcess(){
 
-
-
-    }
     void Init(){
         //testServer = new ServerCommunication("http://13.124.181.199:3000", mainHandler);
         mServer = new ServerCommunication("http://165.132.221.64:52273", mainHandler);
