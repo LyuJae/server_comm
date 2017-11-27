@@ -68,8 +68,7 @@ public class LoginActivity extends AppCompatActivity {
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LoginProcess();
-                //testServer.SendMSG("test");
+                mServer.LoginProcess(id_text.getText().toString(), pw_text.getText().toString());
             }
         });
         signupBtn.setOnClickListener(new View.OnClickListener() {
@@ -85,11 +84,6 @@ public class LoginActivity extends AppCompatActivity {
 
             }
         });
-    }
-    public void LoginProcess(){
-        mServer.SetProperty("id", id_text.getText().toString());
-        mServer.SetProperty("pw", pw_text.getText().toString());
-        mServer.SendMSG("login");
     }
 
     void Init(){

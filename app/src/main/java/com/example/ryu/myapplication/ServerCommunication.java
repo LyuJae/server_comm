@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -36,18 +37,35 @@ public class ServerCommunication {
     public ServerCommunication(String URL, Handler handler) {
         this.mURL = URL;
         mHandler = handler;
-        mProperties = new HashMap<String, String>();
+
     }
 
     public void SetProperty(String key, String value){
+        if (mProperties == null)
+            mProperties = new HashMap<String, String>();
         this.mProperties.put(key, value);
     }
 
     public void SendMSG(final String msg){
         ConnectOpen(msg);
         SetConnectProperty();
-        SendMessage();
+        if(msg.compareTo("post") == 0 )
+            SendMessage("aaaaaaabbbbbbbbbbbbbcccccccccccccxxxxxxxxxddddddd");
+        else
+            SendMessage();
+        mProperties = null;
     }
+    public void LoginProcess(String id_text, String pw_text){
+        this.SetProperty("id", id_text);
+        this.SetProperty("pw", pw_text);
+        this.SendMSG("login");
+    }
+    public void PostProcess(){
+        this.SetProperty("Accept", "application/json");
+        this.SetProperty("Content-type", "application/json");
+        this.SendMSG("post");
+    }
+
     private void ConnectOpen(final String msg){
         try {
             URL url = new URL(mURL + "/" + msg); //요청 URL을 입력
@@ -57,7 +75,6 @@ public class ServerCommunication {
             conn.setDoInput(true); //input을 사용하도록 설정 (default : true)
             conn.setDoOutput(true); //output을 사용하도록 설정 (default : false)
             conn.setConnectTimeout(60); //타임아웃 시간 설정 (default : 무한대기)
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -74,6 +91,34 @@ public class ServerCommunication {
                 StringBuilder sb = new StringBuilder();
                 try {
                     conn.connect();
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        if (sb.length() > 0) {
+                            sb.append("\n");
+                        }
+                        sb.append(line + "\n");
+                    }
+                    System.out.println("sb : " + sb);
+                    ReadMessage(sb);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
+    }
+    private void SendMessage(final String post){
+        final Thread thread = new Thread(){
+            @Override
+            public void run() {
+                StringBuilder sb = new StringBuilder();
+                try {
+                    DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
+                    dos.write(post.getBytes());
+                    dos.flush();
+                    dos.close();
+
                     BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     String line = null;
                     while ((line = br.readLine()) != null) {
