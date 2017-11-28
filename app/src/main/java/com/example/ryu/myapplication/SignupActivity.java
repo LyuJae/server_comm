@@ -66,12 +66,12 @@ public class SignupActivity extends AppCompatActivity{
         });
     }
     private void Init(){
-        serverCommunication = new ServerCommunication("http://165.132.221.64:52273", mainHandler);
+        serverCommunication = new ServerCommunication(mainHandler);
     }
     private void SignupProcess(){
-        serverCommunication.SetProperty("id", idText.getText().toString());
-        serverCommunication.SetProperty("pw", pwText.getText().toString());
-        serverCommunication.SetProperty("name", nameText.getText().toString());
-        serverCommunication.SendMSG("signup");
+        //serverCommunication.SetProperty("id", idText.getText().toString());
+        //serverCommunication.SetProperty("pw", pwText.getText().toString());
+        //serverCommunication.SetProperty("name", nameText.getText().toString());
+        //serverCommunication.SendMSG("signup");
     }
 }

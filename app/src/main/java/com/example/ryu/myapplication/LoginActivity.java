@@ -22,30 +22,30 @@ public class LoginActivity extends AppCompatActivity {
     EditText id_text;
     EditText pw_text;
 
-
-
     Handler mainHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
+            SharedPreferences pref = null;
+            SharedPreferences.Editor edit = null;
             switch (msg.getData().getInt("result")){
-                case ServerCommunication.SERVER_CONNECT_OK:
-                    break;
-                case ServerCommunication.LOGIN_SUCCESS:
+                case ServerCommunication.SERVER_CONNECT_SUCCESS:
                     Toast.makeText(getApplicationContext(), "Login Succ", Toast.LENGTH_SHORT).show();
-                    SharedPreferences pref = getSharedPreferences("pro_pref", 0);
-                    SharedPreferences.Editor edit = pref.edit();
+                    pref = getSharedPreferences("info", MODE_PRIVATE);
+                    edit = pref.edit();
+                    edit.putString("usr_id", id_text.getText().toString());
+                    edit.putString("islogin", "true");
                     edit.putString("uuid", msg.getData().getString("session_key"));
                     edit.commit();
-                    break;
-                case ServerCommunication.LOGIN_FAIL:
-                    Toast.makeText(getApplicationContext(), "Login Fail", Toast.LENGTH_SHORT).show();
+                    finish();
                     break;
                 case ServerCommunication.SERVER_CONNECT_FAIL:
-                    Toast.makeText(getApplicationContext(), "Server Connect Fail", Toast.LENGTH_SHORT).show();
-                    break;
-                case 2000:
-                    System.out.println("2000");
+                    Toast.makeText(getApplicationContext(), "... Login Fail", Toast.LENGTH_SHORT).show();
+                    pref = getSharedPreferences("info", MODE_PRIVATE);
+                    edit = pref.edit();
+                    edit.putString("usr_id", id_text.getText().toString());
+                    edit.putString("islogin", "false");
+                    edit.commit();
                     break;
             }
         }
@@ -87,7 +87,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     void Init(){
-        //testServer = new ServerCommunication("http://13.124.181.199:3000", mainHandler);
-        mServer = new ServerCommunication("http://165.132.221.64:52273", mainHandler);
+        mServer = new ServerCommunication(mainHandler);
     }
 }
